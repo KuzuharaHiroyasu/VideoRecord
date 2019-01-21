@@ -47,7 +47,10 @@ namespace VideoRecord
             video = new CvVideoWriter("video.avi", FourCC.MJPG, fps, new CvSize(width, height));
 
             // DoWorkイベントハンドラの実行を開始
-            worker.RunWorkerAsync();
+            if (!worker.IsBusy)
+            {
+                worker.RunWorkerAsync();
+            }
 
             button_start.Enabled = false;
             button_stop.Enabled = true;
