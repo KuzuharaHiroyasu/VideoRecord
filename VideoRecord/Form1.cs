@@ -80,17 +80,28 @@ namespace VideoRecord
         private void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             // カメラからの映像を受け取る
-            using (var capture = Cv.CreateCameraCapture(CaptureDevice.Any))
+            try
             {
-                IplImage frame;
-                while (true)
+                using (var capture = Cv.CreateCameraCapture(CaptureDevice.Any))
                 {
-                    frame = Cv.QueryFrame(capture);
+                    IplImage frame;
+                    while (true)
+                    {
+                        frame = Cv.QueryFrame(capture);
 
-                    // 新しい画像を取得したので、
-                    // ReportProgressメソッドを使って、ProgressChangedイベントを発生させる
-                    worker.ReportProgress(0, frame);
+                        // 新しい画像を取得したので、
+                        // ReportProgressメソッドを使って、ProgressChangedイベントを発生させる
+                        worker.ReportProgress(0, frame);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                if (video != null)
+                {
+                    video.Dispose();
+                }
+                button_start.Invoke(new D_Button_Cnt(button_Cnt));
             }
         }
 
@@ -117,6 +128,21 @@ namespace VideoRecord
             }
 
             pictureBoxIpl_video.ImageIpl = reImage;
+        }
+
+        private delegate void D_Button_Cnt();
+        private void button_Cnt()
+        {
+            // メッセージを最前面に表示
+            using (Form f = new Form())
+            {
+                f.TopMost = true;
+                MessageBox.Show(f, "カメラを検出できませんでした。");
+                f.TopMost = false;
+            }
+
+            button_start.Enabled = true;
+            button_stop.Enabled = false;
         }
     }
 }
